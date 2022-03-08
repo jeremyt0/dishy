@@ -1,13 +1,20 @@
 from analysis.auto import Automator
 import argparse
 import sys
+import os
 
 
 class Main:
     def main(path):
         print(f"Project directory: {path}")
 
-        program = Automator(project_dir=path)
+        images_dir = path
+        if path == "":
+            root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            images_dir = os.path.join(root_dir, "IMAGES")
+            os.makedirs(images_dir, exist_ok=True)
+
+        program = Automator(project_dir=images_dir)
 
         program.run()
 

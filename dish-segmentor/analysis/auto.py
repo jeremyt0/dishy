@@ -3,6 +3,7 @@ from analysis.detector import Detector
 import glob
 import os
 
+# TODO: Add logging
 
 class Automator:
 
@@ -33,7 +34,12 @@ class Automator:
     def step_0(self):
         # Make paths
         self.colour_image_paths = self.find_all_images_in_dir(self.project_dir)
-        # print(f'All image paths: {self.colour_image_paths}')
+        
+        # Add note to folder if no images
+        if not self.colour_image_paths:
+            self.write_note()
+        else:
+            self.remove_note()
 
         # Make steps
         self.make_steps()
@@ -53,7 +59,11 @@ class Automator:
         '''
         Returns list of image paths
         '''
-        image_files = glob.glob(os.path.join(dir, "*.png"))
+        img_types = ("*.png", "*.jpg", "*.jpeg")
+        image_files = []
+
+        for ext in img_types:
+            image_files.extend(glob.glob(os.path.join(dir, ext)))
         return image_files
 
 
@@ -64,4 +74,16 @@ class Automator:
         
         return detector[colour] if colour in detector else Detector
 
+
+    def write_note(self):
+        filename = os.path.join(self.project_dir, "PLEASE COPY IMAGES HERE.txt")
+        with open(filename, 'w') as f:
+            f.write(f"Please add your colour images in this directory. Thank you.")
+
+    def remove_note(self):
+        filename = "PLEASE COPY IMAGES HERE.txt"
+        text_file = glob.glob(os.path.join(self.project_dir, filename))
+        if text_file:
+            os.remove(text_file[0])
+        
 
