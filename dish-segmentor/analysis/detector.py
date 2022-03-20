@@ -66,12 +66,10 @@ class Detector(object):
 
     def start_analysis(self, image_path):
         # 1. Get image
-        # print("## Step 1 - Getting Image ##")
         LOGGER.debug("# Step 1 - Reading image #")
         self.image = ImageUtils.read_image(image_path)  
 
         # Convert RGB to HSV, LAB
-        # print("## Step 2 - Converting to Different Colour Channels ##")
         LOGGER.debug("# Step 2 - Converting to different colour channels #")
         self.image_HSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         self.image_GRAY = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
@@ -81,16 +79,13 @@ class Detector(object):
         ImageUtils.try_save_img_small(self.image_RGB, os.path.join(self.output_images_dirpath, "0_RGB.png"), max_size=1000)
 
         # 3. Detect each leaf
-        # print("## Step 3 - Getting leaf regions ##")
         LOGGER.debug("# Step 3 - Getting leaf regions #")
         self.leaf_regions = self.detect_leaves()  
 
         # 4. Get values from final leaf mask
-        # print("## Step 4 - Saving Results! ##")
         LOGGER.debug("# Step 4 - Saving results! #")
         results = self.output_results()  
 
-        # print("## Step 5 - Done! ##")
         LOGGER.debug("# Step 5 - Done! #")
 
 
@@ -103,7 +98,6 @@ class Detector(object):
         img_mask = self.get_hsv_mask(self.image_HSV) 
 
         save_img_name = "1_HSV_mask.png"
-        # print(f'\tSaving image: {save_img_name}')
         LOGGER.debug(f"\tSaving image: {save_img_name}")
         ImageUtils.try_save_img_small(img_mask, os.path.join(self.output_images_dirpath, save_img_name))
 
@@ -117,7 +111,6 @@ class Detector(object):
         mask_img = cv2.erode(mask_img.astype(np.uint8), kernel, iterations=3)  # Erode
 
         save_img_name = "2_cleaned.png"
-        # print(f'\tSaving image: {save_img_name}')
         LOGGER.debug(f"\tSaving image: {save_img_name}")
         ImageUtils.try_save_img_small(mask_img.astype(bool), os.path.join(self.output_images_dirpath, save_img_name))
 
@@ -127,7 +120,6 @@ class Detector(object):
         labelled_mask, _ = ndi.measurements.label(mask_img)
 
         for region in regionprops(labelled_mask):
-            # print(region.area, region.eccentricity, region.solidity)
             if region.area < 1000 or region.eccentricity >= 0.8 or region.solidity <= 0.4:
                 continue
             leaf_regions.append(region)
@@ -183,12 +175,10 @@ class Detector(object):
 
         ### Save images ###
         save_img_name = "3_ROI.png"
-        # print(f'\tSaving image: {save_img_name}')
         LOGGER.debug(f"\tSaving image: {save_img_name}")
         ImageUtils.try_save_img_small(rectangle_mask, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 
         save_img_name = "4_final_mask.png"
-        # print(f'\tSaving image: {save_img_name}')
         LOGGER.debug(f"\tSaving image: {save_img_name}")
         ImageUtils.try_save_img_small(final_mask.astype(np.uint8)*255, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 
@@ -198,7 +188,6 @@ class Detector(object):
         output_img = self.output_numbered_squares(sorted_leaf_regions, final_mask_cropped)
 
         save_img_name = "5_final_ordered.png"
-        # print(f'\tSaving image: {save_img_name}')
         LOGGER.debug(f"\tSaving image: {save_img_name}")
         ImageUtils.try_save_img_small(output_img, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 

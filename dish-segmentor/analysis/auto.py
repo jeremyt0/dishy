@@ -15,7 +15,6 @@ class Automator:
         '''
         Auto run from directory
         '''
-        # print("### Running Detector ###\n")
         LOGGER.debug("### Running Detector ###")
 
         # Pre-requisites
@@ -25,7 +24,6 @@ class Automator:
         for step in steps:
             self.steps[step]()
 
-        # print("### Finished running Detector ###\n")
         LOGGER.success("### Finished running Detector ###")
 
     def make_steps(self):
@@ -54,7 +52,6 @@ class Automator:
         detector = self.get_detector(img_colour)()
         # For each image
         for n, img in enumerate(self.colour_image_paths): 
-            # print(f'Running image ({n+1}/{len(self.colour_image_paths)}): {img}')
             LOGGER.debug(f'Running image ({n+1}/{len(self.colour_image_paths)}): {img}')
             detector.run(img)
             
