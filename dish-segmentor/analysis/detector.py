@@ -11,8 +11,9 @@ import pandas as pd
 from skimage.morphology import remove_small_holes, remove_small_objects
 from skimage.measure import regionprops, label
 from scipy import ndimage as ndi
+import kmeans1d
 
-
+from itertools import groupby
 
 
 class Detector(object):
@@ -217,23 +218,38 @@ class Detector(object):
     def sort_regions_order(self, regions, order="row"):
         '''
         regions: list of regions
-        Sort list of regions by rows
+        Sort list of regions by rows (default)
         '''
         if order == "row":
             x1, y1 = 0, 1
         else:  # col
             y1, x1 = 0, 1
-        # 1. Sort y-centroid
+        # 1. Sort row
         sorted_regions = deque(sorted(regions, key=lambda r: r["centroid"][x1], reverse=False))
 
-        # 2. Sort x-centroid per row
-        for num_rows in range(self.rows):
-            row_regions = []
-            for num_cols in range(self.columns):
-                row_regions.append(sorted_regions.popleft())
-            # Sort against index 1 (x value)
-            sorted_row = sorted(row_regions, key=lambda r: r["centroid"][y1], reverse=False)
-            sorted_regions.extend(sorted_row)
+        # Get cluster groups for sorted by rows (y px co-ordinate)
+        x_list = [r["centroid"][x1] for r in sorted_regions]
+        k = self.rows
+        clusters, centroids = kmeans1d.cluster(x_list, k)
+
+        row_regions = []
+        next_tracker = 1
+        # 2. Sort x-centroid per clustered group
+        for i, g in enumerate(clusters):
+            last_one = i==(len(clusters)-1)
+            if g == next_tracker or last_one:
+                # print(f'{g} == {next_tracker}')
+                if last_one:
+                    row_regions.append(sorted_regions.popleft())
+                sorted_row = sorted(row_regions, key=lambda r: r["centroid"][y1], reverse=False)
+                sorted_regions.extend(sorted_row)
+                if last_one:
+                    break
+                next_tracker += 1
+                row_regions = []
+            # print(f"Popped {i}: G {g}")
+            row_regions.append(sorted_regions.popleft())
+        
         return sorted_regions
 
 
