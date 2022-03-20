@@ -65,7 +65,10 @@ class Automator:
         image_files = []
 
         for ext in img_types:
+            # Lowercase
             image_files.extend(glob.glob(os.path.join(dir, ext)))
+            # Uppercase
+            image_files.extend(glob.glob(os.path.join(dir, ext.upper())))
         return image_files
 
 
