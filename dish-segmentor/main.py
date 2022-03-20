@@ -1,6 +1,8 @@
 from dishy import Main
+from utilities.logg import LOGGER
 
 if __name__=="__main__":
-    # path = "C:\\Users\\Jeee\\Documents\\Projects\\github\\dishy\\images\\colour"
-    path = ""
+    LOGGER.debug("Starting application...")
+    path = "../images"
     Main.main(path=path)
+    LOGGER.success("End of program.")

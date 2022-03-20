@@ -1,5 +1,6 @@
 from loguru import logger
 import os
+import sys
 import datetime
 
 class Logger:
@@ -13,8 +14,12 @@ class Logger:
     # Create log file
     log_filepath = os.path.join(log_folder, log_file)
 
+    # Remove default logger
+    logger.remove()
+    # Add message only in stdout
+    logger.add(sys.stdout, format="{message}")
     # Add log file to logger
-    logger.add(log_filepath)
+    logger.add(log_filepath, enqueue=True, backtrace=True, diagnose=True)
 
 # Exported log variable
-LOG = logger
+LOGGER = logger

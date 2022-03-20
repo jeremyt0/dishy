@@ -1,9 +1,9 @@
 from analysis.detector import Detector
+from utilities.logg import LOGGER
 
 import glob
 import os
 
-# TODO: Add logging
 
 class Automator:
 
@@ -15,7 +15,8 @@ class Automator:
         '''
         Auto run from directory
         '''
-        print("### Running Detector ###\n")
+        # print("### Running Detector ###\n")
+        LOGGER.debug("### Running Detector ###")
 
         # Pre-requisites
         self.step_0()
@@ -24,7 +25,8 @@ class Automator:
         for step in steps:
             self.steps[step]()
 
-        print("### Finished running Detector ###\n")
+        # print("### Finished running Detector ###\n")
+        LOGGER.success("### Finished running Detector ###")
 
     def make_steps(self):
         self.steps = {
@@ -32,6 +34,7 @@ class Automator:
         }
 
     def step_0(self):
+        LOGGER.debug("## Step 0 - Pre-requisites ##")
         # Make paths
         self.colour_image_paths = self.find_all_images_in_dir(self.project_dir)
         
@@ -43,6 +46,7 @@ class Automator:
 
         # Make steps
         self.make_steps()
+        LOGGER.success("## Step 0 - Finished ##")
 
 
     def step_1(self):
@@ -50,7 +54,8 @@ class Automator:
         detector = self.get_detector(img_colour)()
         # For each image
         for n, img in enumerate(self.colour_image_paths): 
-            print(f'Running image ({n+1}/{len(self.colour_image_paths)}): {img}')
+            # print(f'Running image ({n+1}/{len(self.colour_image_paths)}): {img}')
+            LOGGER.debug(f'Running image ({n+1}/{len(self.colour_image_paths)}): {img}')
             detector.run(img)
             
                 

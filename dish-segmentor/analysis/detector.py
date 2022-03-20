@@ -1,4 +1,6 @@
 from utilities.imageutils import ImageUtils
+from utilities.logg import LOGGER
+
 from collections import deque
 import os
 import sys
@@ -64,27 +66,32 @@ class Detector(object):
 
     def start_analysis(self, image_path):
         # 1. Get image
-        print("## Step 1 - Getting Image ##")
+        # print("## Step 1 - Getting Image ##")
+        LOGGER.debug("# Step 1 - Reading image #")
         self.image = ImageUtils.read_image(image_path)  
 
         # Convert RGB to HSV, LAB
-        print("## Step 2 - Converting to Different Colour Channels ##")
+        # print("## Step 2 - Converting to Different Colour Channels ##")
+        LOGGER.debug("# Step 2 - Converting to different colour channels #")
         self.image_HSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         self.image_GRAY = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         self.image_RGB = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-        ImageUtils.try_save_img_small(self.image_HSV, f'{self.output_images_dirpath}\\0_HSV.png', max_size=1000)
-        ImageUtils.try_save_img_small(self.image_GRAY, f'{self.output_images_dirpath}\\0_GRAY.png', max_size=1000)
-        ImageUtils.try_save_img_small(self.image_RGB, f'{self.output_images_dirpath}\\0_RGB.png', max_size=1000)
+        ImageUtils.try_save_img_small(self.image_HSV, os.path.join(self.output_images_dirpath, "0_HSV.png"), max_size=1000)
+        ImageUtils.try_save_img_small(self.image_GRAY, os.path.join(self.output_images_dirpath, "0_GRAY.png"), max_size=1000)
+        ImageUtils.try_save_img_small(self.image_RGB, os.path.join(self.output_images_dirpath, "0_RGB.png"), max_size=1000)
 
         # 3. Detect each leaf
-        print("## Step 3 - Getting leaf regions ##")
+        # print("## Step 3 - Getting leaf regions ##")
+        LOGGER.debug("# Step 3 - Getting leaf regions #")
         self.leaf_regions = self.detect_leaves()  
 
         # 4. Get values from final leaf mask
-        print("## Step 4 - Saving Results! ##")
+        # print("## Step 4 - Saving Results! ##")
+        LOGGER.debug("# Step 4 - Saving results! #")
         results = self.output_results()  
 
-        print("## Step 5 - Done! ##")
+        # print("## Step 5 - Done! ##")
+        LOGGER.debug("# Step 5 - Done! #")
 
 
     def detect_leaves(self):
@@ -96,8 +103,9 @@ class Detector(object):
         img_mask = self.get_hsv_mask(self.image_HSV) 
 
         save_img_name = "1_HSV_mask.png"
-        print(f'\tSaving image: {save_img_name}')
-        ImageUtils.try_save_img_small(img_mask, f'{self.output_images_dirpath}\\{save_img_name}')
+        # print(f'\tSaving image: {save_img_name}')
+        LOGGER.debug(f"\tSaving image: {save_img_name}")
+        ImageUtils.try_save_img_small(img_mask, os.path.join(self.output_images_dirpath, save_img_name))
 
 
         ### Clean ###
@@ -109,8 +117,9 @@ class Detector(object):
         mask_img = cv2.erode(mask_img.astype(np.uint8), kernel, iterations=3)  # Erode
 
         save_img_name = "2_cleaned.png"
-        print(f'\tSaving image: {save_img_name}')
-        ImageUtils.try_save_img_small(mask_img.astype(bool), f'{self.output_images_dirpath}\\{save_img_name}')
+        # print(f'\tSaving image: {save_img_name}')
+        LOGGER.debug(f"\tSaving image: {save_img_name}")
+        ImageUtils.try_save_img_small(mask_img.astype(bool), os.path.join(self.output_images_dirpath, save_img_name))
 
         
         ### Filter leaf/not leaf ###
@@ -145,7 +154,7 @@ class Detector(object):
 
             # 2. Get cropped mask regions RGB
             ROI_rgb_cropped = ImageUtils.get_cropped_region_img(leaf_region, ROI_rgb)
-            ImageUtils.try_save_img(ROI_rgb_cropped, f'{self.tmp_region_images_dirpath}\\{n+1}.png')
+            ImageUtils.try_save_img(ROI_rgb_cropped, os.path.join(self.tmp_region_images_dirpath, f'{n+1}.png'))
 
             ### HSV ### 
             # 1. Get only mask regions of HSV image
@@ -156,7 +165,7 @@ class Detector(object):
 
             # 3. Get brown mask of leaf
             ROI_brown = ImageUtils.get_brown_mask(ROI_hsv_cropped)
-            ImageUtils.try_save_img(ROI_brown, f'{self.tmp_region_images_dirpath}\\{n+1}_brown.png')
+            ImageUtils.try_save_img(ROI_brown, os.path.join(self.tmp_region_images_dirpath, f'{n+1}_brown.png'))
             ROI_brown_ratio = ImageUtils.total_brown(ROI_brown, ROI_tmp_img)
             self.results[self.image_name_pure]['brown'].append(ROI_brown_ratio)
 
@@ -170,24 +179,28 @@ class Detector(object):
 
         sys.stdout.flush()
         print()
+        LOGGER.info("\tFinished leaf regions.")
+
         ### Save images ###
         save_img_name = "3_ROI.png"
-        print(f'\tSaving image: {save_img_name}')
-        ImageUtils.try_save_img_small(rectangle_mask, f'{self.output_images_dirpath}\\{save_img_name}', max_size=self.MAX_IMG_SIZE)
+        # print(f'\tSaving image: {save_img_name}')
+        LOGGER.debug(f"\tSaving image: {save_img_name}")
+        ImageUtils.try_save_img_small(rectangle_mask, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 
         save_img_name = "4_final_mask.png"
-        print(f'\tSaving image: {save_img_name}')
-        ImageUtils.try_save_img_small(final_mask.astype(np.uint8)*255, f'{self.output_images_dirpath}\\{save_img_name}', max_size=self.MAX_IMG_SIZE)
+        # print(f'\tSaving image: {save_img_name}')
+        LOGGER.debug(f"\tSaving image: {save_img_name}")
+        ImageUtils.try_save_img_small(final_mask.astype(np.uint8)*255, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 
         # Output numbered regions with highlights
+        LOGGER.debug("\tOutputting numbered regions")
         final_mask_cropped = ImageUtils.get_mask_cropped_img(self.image_RGB.copy(), final_mask)
         output_img = self.output_numbered_squares(sorted_leaf_regions, final_mask_cropped)
 
         save_img_name = "5_final_ordered.png"
-        print(f'\tSaving image: {save_img_name}')
-        ImageUtils.try_save_img_small(output_img, f'{self.output_images_dirpath}\\{save_img_name}', max_size=self.MAX_IMG_SIZE)
-
-        print()
+        # print(f'\tSaving image: {save_img_name}')
+        LOGGER.debug(f"\tSaving image: {save_img_name}")
+        ImageUtils.try_save_img_small(output_img, os.path.join(self.output_images_dirpath, save_img_name), max_size=self.MAX_IMG_SIZE)
 
         return sorted_leaf_regions
 
@@ -204,12 +217,10 @@ class Detector(object):
                    'Brown Ratio': brown_ratios,
                    })
 
-        df.to_csv(f'{self.output_images_dirpath}\\results.csv')
+        df.to_csv(os.path.join(self.output_images_dirpath, "results.csv"))
 
         return True
         
-
-
 
 
     ### Methods ###
