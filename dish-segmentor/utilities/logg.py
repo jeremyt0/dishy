@@ -9,7 +9,7 @@ class Logger:
     # os.makedirs(log_folder, exist_ok=True)
 
     # Create filename
-    log_file = f'{datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.log'
+    log_file = f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
 
     # Create log file
     log_filepath = os.path.join(log_folder, log_file)
