@@ -121,7 +121,7 @@ class Detector(object):
         labelled_mask, _ = ndi.measurements.label(mask_img)
 
         for region in regionprops(labelled_mask):
-            if region.area < 1000 or region.eccentricity >= 0.8 or region.solidity <= 0.4:
+            if region.area < 10000 or region.eccentricity >= 0.8 or region.solidity <= 0.4:
                 continue
             leaf_regions.append(region)
             continue
